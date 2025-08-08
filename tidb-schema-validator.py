@@ -65,7 +65,7 @@ DETECTION_RULES = [
         'pattern': re.compile(r'CHARSET\s*=\s*(\w+)', re.IGNORECASE),
         'action': 'replace',
         'replace': 'CHARSET=utf8mb4',
-        'message': 'Unsupported character set. Replacing with utf8mb4.'
+        'message': 'Unsupported charet=. Replacing with utf8mb4.'
     },
     {
         'name': 'Unsupported COLLATE',
@@ -79,7 +79,7 @@ DETECTION_RULES = [
         'pattern': re.compile(r'COLLATE\s*=\s*(\w+)', re.IGNORECASE),
         'action': 'replace',
         'replace': 'COLLATE = utf8mb4_bin',
-        'message': 'Unsupported COLLATE. Replacing with utf8mb4_bin.'
+        'message': 'Unsupported COLLATE=. Replacing with utf8mb4_bin.'
     },
     {
         'name': 'Column-Level Privileges',
@@ -194,14 +194,14 @@ def check_compatibility(input_file, apply_fix=False):
                 if rule['name'] in ( 'Unsupported Character Sets' ) :
                     charset = match.group(1).lower()
                     if charset not in SUPPORTED_CHARSETS:
-                        line_modified = rule['pattern'].sub(rule['replace'], line)
+                        line_modified = rule['pattern'].sub(rule['replace'], line_modified)
                         line_warnings.append(rule['message'])
 
                 # collate
                 if rule['name'] in ( 'Unsupported COLLATE' ) :
                     collate = match.group(1).lower()
                     if collate not in SUPPORTED_COLLATIONS:
-                        line_modified = rule['pattern'].sub(rule['replace'], line)
+                        line_modified = rule['pattern'].sub(rule['replace'], line_modified)
                         line_warnings.append(rule['message'])
                 
                 # desc index
@@ -222,7 +222,7 @@ def check_compatibility(input_file, apply_fix=False):
                 
                 # replace words
                 elif rule['action'] == 'replace':
-                    line_modified = rule['pattern'].sub(rule['replace'], line)
+                    line_modified = rule['pattern'].sub(rule['replace'], line_modified)
                     line_warnings.append(rule['message'])
         
         # collect warnings
