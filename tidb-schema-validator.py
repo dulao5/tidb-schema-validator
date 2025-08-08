@@ -1,9 +1,19 @@
+import os
 import re
 import sys
 import argparse
 
 # support charsets
-SUPPORTED_CHARSETS = {'utf8mb4', 'utf8', 'latin1', 'ascii', 'binary', 'gbk'}
+SUPPORTED_CHARSETS = {'utf8mb4', 'latin1', 'ascii', 'binary', 'gbk'}
+
+# support collations
+SUPPORTED_COLLATIONS = {
+    'utf8mb4_bin', 'utf8mb4_general_ci', 'utf8mb4_unicode_ci', 'utf8mb4_0900_ai_ci', 'utf8mb4_0900_bin',
+    'ascii_bin',
+    'latin1_bin',
+    'binary',
+    'gbk_bin', 'gbk_chinese_ci'
+}
 
 # check rules
 DETECTION_RULES = [
@@ -49,6 +59,27 @@ DETECTION_RULES = [
         'action': 'replace',
         'replace': 'CHARACTER SET utf8mb4',
         'message': 'Unsupported character set. Replacing with utf8mb4.'
+    },
+    {
+        'name': 'Unsupported Character Sets',
+        'pattern': re.compile(r'CHARSET\s*=\s*(\w+)', re.IGNORECASE),
+        'action': 'replace',
+        'replace': 'CHARSET=utf8mb4',
+        'message': 'Unsupported character set. Replacing with utf8mb4.'
+    },
+    {
+        'name': 'Unsupported COLLATE',
+        'pattern': re.compile(r'COLLATE\s+(\w+)', re.IGNORECASE),
+        'action': 'replace',
+        'replace': 'COLLATE utf8mb4_bin',
+        'message': 'Unsupported COLLATE. Replacing with utf8mb4_bin.'
+    },
+    {
+        'name': 'Unsupported COLLATE',
+        'pattern': re.compile(r'COLLATE\s*=\s*(\w+)', re.IGNORECASE),
+        'action': 'replace',
+        'replace': 'COLLATE = utf8mb4_bin',
+        'message': 'Unsupported COLLATE. Replacing with utf8mb4_bin.'
     },
     {
         'name': 'Column-Level Privileges',
@@ -99,7 +130,11 @@ def check_compatibility(input_file, apply_fix=False):
     delimiter_block_lines = []
     block_start_line = 0
     
-    with open(input_file, 'r') as f:
+    full_input_path = os.path.abspath(input_file)
+    input_dir = os.path.dirname(full_input_path)
+    input_filename = os.path.basename(full_input_path)
+
+    with open(full_input_path, 'r') as f:
         lines = f.readlines()
     
     i = 0
@@ -156,9 +191,16 @@ def check_compatibility(input_file, apply_fix=False):
             match = rule['pattern'].search(line)
             if match:
                 # charset
-                if rule['name'] == 'Unsupported Character Sets':
+                if rule['name'] in ( 'Unsupported Character Sets' ) :
                     charset = match.group(1).lower()
                     if charset not in SUPPORTED_CHARSETS:
+                        line_modified = rule['pattern'].sub(rule['replace'], line)
+                        line_warnings.append(rule['message'])
+
+                # collate
+                if rule['name'] in ( 'Unsupported COLLATE' ) :
+                    collate = match.group(1).lower()
+                    if collate not in SUPPORTED_COLLATIONS:
                         line_modified = rule['pattern'].sub(rule['replace'], line)
                         line_warnings.append(rule['message'])
                 
@@ -202,7 +244,8 @@ def check_compatibility(input_file, apply_fix=False):
     
     # output to file when apply_fix
     if apply_fix:
-        output_file = 'tidb_compatible_' + input_file
+        output_filename = 'tidb_compatible_' + input_filename
+        output_file = os.path.join(input_dir, output_filename) if input_dir else output_filename
         with open(output_file, 'w') as f:
             f.writelines(output_lines)
         print(f"\nModified schema file generated: {output_file}")

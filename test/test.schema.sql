@@ -10,18 +10,20 @@ use legacy_db;
 -- Tables with various compatibility issues
 CREATE TABLE products (
   id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(255) CHARACTER SET latin2 NOT NULL,
+  name VARCHAR(255) CHARACTER SET latin2 COLLATE latin2_bin NOT NULL,
+  name2 VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  name3 VARCHAR(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin NOT NULL,
   description TEXT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   FULLTEXT KEY ft_idx (description)  -- Fulltext index
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8;
 
 CREATE TABLE spatial_data (
   id INT(11) NOT NULL AUTO_INCREMENT,
   location GEOMETRY NOT NULL SRID 4326,
   SPATIAL INDEX sp_idx (location),  -- Spatial index
   PRIMARY KEY (id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 CREATE TABLE partitioned_table (
   id INT NOT NULL,
