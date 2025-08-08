@@ -48,7 +48,9 @@ python mysql-schema-checker.py test.schema.sql --apply
 # output fix file to tidb_compatible_test.schema.sql
 ```
 diff test.schema.sql vs tidb_compatible_test.schema.sql
+<img width="1506" alt="Image" src="https://github.com/user-attachments/assets/314b8729-dee3-4bee-b92b-a508716c76c7" />
 
+<img width="1506" alt="Image" src="https://github.com/user-attachments/assets/ca87070b-5841-40c0-b29f-569137cdc996" />
 
 ## Runtime Features (Require Manual Verification)
 These features cannot be detected in schema dumps and require application-level checks:
