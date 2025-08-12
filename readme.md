@@ -48,7 +48,6 @@ python mysql-schema-checker.py test.schema.sql --apply
 # output fix file to tidb_compatible_test.schema.sql
 ```
 diff test.schema.sql vs tidb_compatible_test.schema.sql
-<img width="1506" alt="Image" src="https://github.com/user-attachments/assets/314b8729-dee3-4bee-b92b-a508716c76c7" />
 
 <img width="1506" alt="Image" src="https://github.com/user-attachments/assets/9b2d226d-ad7f-4bc9-a86e-6d63af8918a3" />
 
