@@ -239,7 +239,7 @@ def check_compatibility(input_file, apply_fix=False):
     
     # output warnings
     for line_num, warning in warnings:
-        print(f"{input_file}:{line_num}: WARNING - {warning}")
+        print(f"{input_file}:{line_num} : WARNING - {warning}")
     
     # output to file when apply_fix
     if apply_fix:
