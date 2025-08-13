@@ -130,11 +130,10 @@ def check_compatibility(input_file, apply_fix=False):
     delimiter_block_lines = []
     block_start_line = 0
     
-    full_input_path = os.path.abspath(input_file)
-    input_dir = os.path.dirname(full_input_path)
-    input_filename = os.path.basename(full_input_path)
+    input_dir = os.path.dirname(input_file)
+    input_filename = os.path.basename(input_file)
 
-    with open(full_input_path, 'r') as f:
+    with open(input_file, 'r') as f:
         lines = f.readlines()
     
     i = 0
@@ -240,7 +239,7 @@ def check_compatibility(input_file, apply_fix=False):
     
     # output warnings
     for line_num, warning in warnings:
-        print(f"Line {line_num}: WARNING - {warning}")
+        print(f"{input_file}:{line_num}: WARNING - {warning}")
     
     # output to file when apply_fix
     if apply_fix:
