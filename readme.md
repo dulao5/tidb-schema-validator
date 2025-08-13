@@ -39,6 +39,7 @@ With --apply: Generates modified output_schema.sql
 | Descending Indexes               | `CREATE TABLE t (a INT, b INT, INDEX idx(a DESC, b ASC));`             |
 | Subpartitioning                  | `CREATE TABLE t (id INT) PARTITION BY RANGE(id) SUBPARTITION BY HASH(id)|
 | Auto-increment Behavior Notice   | `CREATE TABLE t (id INT PRIMARY KEY AUTO_INCREMENT);`                  |
+| Auto-increment BigintType        | `id int(10) NOT NULL AUTO_INCREMENT`                                   |
 
 
 ## Sample

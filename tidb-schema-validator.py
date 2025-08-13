@@ -115,10 +115,16 @@ DETECTION_RULES = [
     },
     {
         'name': 'Auto-increment Behavior',
-        'pattern': re.compile(r'\bAUTO_INCREMENT\b', re.IGNORECASE),
+        'pattern': re.compile(r'\bAUTO_INCREMENT[^=]', re.IGNORECASE),
         'action': 'warn',
         'message': 'Note: TiDB auto_increment is instance-scoped monotonic but not cluster-wide continuous. '
                    'For global monotonicity, add AUTO_ID_CACHE=1.'
+    },
+    {
+        'name': 'Auto-increment BigintType',
+        'pattern': re.compile(r'\s(TINYINT|SMALLINT|MEDIUMINT|INT).*\bAUTO_INCREMENT[^=]', re.IGNORECASE),
+        'action': 'warn',
+        'message': 'Note: The data type of this auto_increment field is not BIGINT, which poses a risk of overflow.'
     }
 ]
 
