@@ -15,7 +15,7 @@ Perfect for DBAs and developers preparing databases for TiDB deployment.
 ## Usage
 
 ```bash
-python mysql-schema-checker.py <input_schema.sql> [--apply]
+python tidb-schema-checker.py <input_schema.sql> [--apply]
 
 Without --apply: Outputs incompatible SQL line numbers with warnings
 
