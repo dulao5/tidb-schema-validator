@@ -45,7 +45,7 @@ With --apply: Generates modified output_schema.sql
 
 ## Sample
 ```
-python mysql-schema-checker.py test.schema.sql --apply
+python tidb-schema-checker.py test.schema.sql --apply
 # output some warnings
 # output fix file to tidb_compatible_test.schema.sql
 ```
