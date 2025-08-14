@@ -40,6 +40,7 @@ With --apply: Generates modified output_schema.sql
 | Subpartitioning                  | `CREATE TABLE t (id INT) PARTITION BY RANGE(id) SUBPARTITION BY HASH(id)|
 | Auto-increment Behavior Notice   | `CREATE TABLE t (id INT PRIMARY KEY AUTO_INCREMENT);`                  |
 | Auto-increment BigintType        | `id int(10) NOT NULL AUTO_INCREMENT`                                   |
+| Table without PRIMARY KEY or UNIQUE KEY| `CREATE TABLE t (val INT );`                                     |
 
 
 ## Sample

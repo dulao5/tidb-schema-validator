@@ -184,6 +184,23 @@ def check_compatibility(input_file, apply_fix=False):
             i += 1
             continue
         
+        # check create table block
+        if line.strip().upper().startswith('CREATE TABLE'):
+            table_block_lines = [line]
+            j = i + 1
+            # block_end
+            block_end_pattern = re.compile(r'^\s*\)\s*(;|\w.*;)', re.IGNORECASE)
+            while j < len(lines):
+                table_block_lines.append(lines[j])
+                if block_end_pattern.search(lines[j]):
+                    break
+                j += 1
+            table_content = ''.join(table_block_lines)
+            if not re.search(r'\bPRIMARY\s+KEY\b', table_content, re.IGNORECASE) and \
+               not re.search(r'\bUNIQUE\s+KEY\b', table_content, re.IGNORECASE):
+                warnings.append((line_num, 
+                                'Table without PRIMARY KEY or UNIQUE KEY is not recommended in TiDB'))
+
         # process single line rule
         line_modified = line
         line_warnings = []
