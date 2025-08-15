@@ -2,6 +2,7 @@ import os
 import re
 import sys
 import argparse
+import glob
 
 # support charsets
 SUPPORTED_CHARSETS = {'utf8mb4', 'latin1', 'ascii', 'binary', 'gbk'}
@@ -275,18 +276,40 @@ def main():
         description='Check MySQL schema compatibility with TiDB',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog='''Examples:
-  python tidb-schema-validator.py schema.sql
-  python tidb-schema-validator.py schema.sql --apply'''
+  python tidb-schema-validator.py <path or file> [filename-pattern] [--apply]
+  python tidb-schema-validator.py schema.sql --apply
+  python tidb-schema-validator.py ./schemas "*-schema.sql" --apply
+        '''
     )
-    parser.add_argument('input_file', help='Input MySQL schema SQL file')
-    parser.add_argument('--apply', action='store_true', 
-                        help='modify input file in place, removing incompatible features')
-    
+    parser.add_argument('input_path', help='Input MySQL schema SQL file or directory')
+    parser.add_argument('filename_pattern', nargs='?', default='*schema.sql',
+                        help='Filename pattern for directory mode (default: "*schema.sql")')
+    parser.add_argument('--apply', action='store_true',
+                        help='modify input file(s) in place, removing incompatible features')
+
     args = parser.parse_args()
-    
-    print(f"Checking TiDB compatibility for: {args.input_file}")
-    print("=" * 60)
-    check_compatibility(args.input_file, args.apply)
+
+    if os.path.isdir(args.input_path):
+        # Directory mode
+        search_pattern = os.path.join(args.input_path, args.filename_pattern)
+        files = glob.glob(search_pattern)
+        if not files:
+            print(f"No files matched pattern: {search_pattern}")
+            sys.exit(1)
+        print(f"Checking TiDB compatibility for files in: {args.input_path}")
+        print(f"Pattern: {args.filename_pattern}")
+        print("=" * 60)
+        for fpath in files:
+            print(f"\nProcessing: {fpath}")
+            check_compatibility(fpath, args.apply)
+    elif os.path.isfile(args.input_path):
+        # Single file mode
+        print(f"Checking TiDB compatibility for: {args.input_path}")
+        print("=" * 60)
+        check_compatibility(args.input_path, args.apply)
+    else:
+        print(f"Error: {args.input_path} is not a valid file or directory.")
+        sys.exit(1)
 
 if __name__ == '__main__':
     main()

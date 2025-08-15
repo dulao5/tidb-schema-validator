@@ -15,11 +15,22 @@ Perfect for DBAs and developers preparing databases for TiDB deployment.
 ## Usage
 
 ```bash
-python tidb-schema-checker.py <input_schema.sql> [--apply]
+usage: tidb-schema-validator.py [-h] [--apply] input_path [filename_pattern]
 
-Without --apply: Outputs incompatible SQL line numbers with warnings
+Check MySQL schema compatibility with TiDB
 
-With --apply: modify input_schema.sql in place
+positional arguments:
+  input_path        Input MySQL schema SQL file or directory
+  filename_pattern  Filename pattern for directory mode (default: "*schema.sql")
+
+options:
+  -h, --help        show this help message and exit
+  --apply           modify input file(s) in place, removing incompatible features
+
+Examples:
+  python tidb-schema-validator.py <path or file> [filename-pattern] [--apply]
+  python tidb-schema-validator.py schema.sql --apply
+  python tidb-schema-validator.py ./schemas "*-schema.sql" --apply
 ```
 
 ## Detectable Features in Schema SQL
