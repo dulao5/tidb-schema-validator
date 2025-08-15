@@ -19,37 +19,40 @@ python tidb-schema-checker.py <input_schema.sql> [--apply]
 
 Without --apply: Outputs incompatible SQL line numbers with warnings
 
-With --apply: Generates modified output_schema.sql
+With --apply: modify input_schema.sql in place
 ```
 
 ## Detectable Features in Schema SQL
 
 
-| Incompatibility                  | Sample                                                                 |
-|----------------------------------|------------------------------------------------------------------------|
-| Stored Procedures and Functions  | `CREATE PROCEDURE simpleproc() BEGIN SELECT * FROM t; END;`            |
-| Triggers                         | `CREATE TRIGGER ins_bef BEFORE INSERT ON t FOR EACH ROW SET NEW.x=1;`  |
-| Events                           | `CREATE EVENT myevent ON SCHEDULE EVERY 1 HOUR DO DELETE FROM t;`      |
-| User-Defined Functions           | `CREATE FUNCTION myfunc() RETURNS INT DETERMINISTIC RETURN 1;`         |
-| Full-Text Indexes                | `CREATE TABLE t (txt TEXT, FULLTEXT idx(txt)) ENGINE=InnoDB;`          |
-| Spatial Types/Indexes            | `CREATE TABLE t (g GEOMETRY NOT NULL SRID 4326, SPATIAL INDEX(g));`    |
-| Unsupported Character Sets       | `CREATE TABLE t (a VARCHAR(10) CHARACTER SET ucs2);`                   |
-| Column-Level Privileges          | `GRANT SELECT(c1), UPDATE(c2) ON db.t TO user@host;`                   |
-| CREATE TABLESPACE                | `CREATE TABLESPACE ts ADD DATAFILE 'ts.ibd' ENGINE=InnoDB;`            |
-| Descending Indexes               | `CREATE TABLE t (a INT, b INT, INDEX idx(a DESC, b ASC));`             |
-| Subpartitioning                  | `CREATE TABLE t (id INT) PARTITION BY RANGE(id) SUBPARTITION BY HASH(id)|
-| Auto-increment Behavior Notice   | `CREATE TABLE t (id INT PRIMARY KEY AUTO_INCREMENT);`                  |
-| Auto-increment BigintType        | `id int(10) NOT NULL AUTO_INCREMENT`                                   |
-| Table without PRIMARY KEY or UNIQUE KEY| `CREATE TABLE t (val INT );`                                     |
+| Incompatibility                    | Sample                                                                 | action                   |
+|------------------------------------|------------------------------------------------------------------------|--------------------------|
+| Stored Procedures and Functions    | `CREATE PROCEDURE simpleproc() BEGIN SELECT * FROM t; END;`            | remove                   |
+| Triggers                           | `CREATE TRIGGER ins_bef BEFORE INSERT ON t FOR EACH ROW SET NEW.x=1;`  | remove                   |
+| Events                             | `CREATE EVENT myevent ON SCHEDULE EVERY 1 HOUR DO DELETE FROM t;`      | remove                   |
+| User-Defined Functions             | `CREATE FUNCTION myfunc() RETURNS INT DETERMINISTIC RETURN 1;`         | remove                   |
+| Full-Text Indexes                  | `CREATE TABLE t (txt TEXT, FULLTEXT idx(txt)) ENGINE=InnoDB;`          | remove                   |
+| Spatial Types/Indexes              | `CREATE TABLE t (g GEOMETRY NOT NULL SRID 4326, SPATIAL INDEX(g));`    | remove                   |
+| Unsupported Character Sets         | `CREATE TABLE t (a VARCHAR(10) CHARACTER SET ucs2);`                   | force_replace_to_utf8mb4 |
+| Column-Level Privileges            | `GRANT SELECT(c1), UPDATE(c2) ON db.t TO user@host;`                   | remove                   |
+| CREATE TABLESPACE                  | `CREATE TABLESPACE ts ADD DATAFILE 'ts.ibd' ENGINE=InnoDB;`            | remove                   |
+| Descending Indexes                 | `CREATE TABLE t (a INT, b INT, INDEX idx(a DESC, b ASC));`             | remove `desc`            |
+| Subpartitioning                    | `CREATE TABLE t (id INT) PARTITION BY RANGE(id) SUBPARTITION BY HASH(id)`|remove `SUBPARTITION`   |
+| Auto-increment Behavior Notice     | `CREATE TABLE t (id INT PRIMARY KEY AUTO_INCREMENT);`                  | warning                  |
+| Auto-increment BigintType          | `id int(10) NOT NULL AUTO_INCREMENT`                                   | warning                  |
+| Table without PRIMARY or UNIQUE KEY| `CREATE TABLE t (val INT );`                                           | warning                  |
 
 
 ## Sample
 ```
+python tidb-schema-checker.py test.schema.sql
+# output some warnings
+
 python tidb-schema-checker.py test.schema.sql --apply
 # output some warnings
-# output fix file to tidb_compatible_test.schema.sql
+# modify test.schema.sql in place 
 ```
-diff test.schema.sql vs tidb_compatible_test.schema.sql
+diff test.schema.sql before vs after(applied)
 
 <img width="1506" alt="Image" src="https://github.com/user-attachments/assets/9b2d226d-ad7f-4bc9-a86e-6d63af8918a3" />
 

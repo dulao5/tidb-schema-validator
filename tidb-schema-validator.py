@@ -56,30 +56,30 @@ DETECTION_RULES = [
     {
         'name': 'Unsupported Character Sets',
         'pattern': re.compile(r'CHARACTER\s+SET\s+(\w+)', re.IGNORECASE),
-        'action': 'replace',
+        'action': 'force_replace_to_utf8mb4',
         'replace': 'CHARACTER SET utf8mb4',
-        'message': 'Unsupported character set. Replacing with utf8mb4.'
+        'message': 'Unsupported character set. Replacing with utf8mb4. 1'
     },
     {
         'name': 'Unsupported Character Sets',
         'pattern': re.compile(r'CHARSET\s*=\s*(\w+)', re.IGNORECASE),
-        'action': 'replace',
+        'action': 'force_replace_to_utf8mb4',
         'replace': 'CHARSET=utf8mb4',
-        'message': 'Unsupported charet=. Replacing with utf8mb4.'
+        'message': 'Unsupported charet=. Replacing with utf8mb4. 2'
     },
     {
         'name': 'Unsupported COLLATE',
         'pattern': re.compile(r'COLLATE\s+(\w+)', re.IGNORECASE),
-        'action': 'replace',
+        'action': 'force_replace_to_utf8mb4_bin',
         'replace': 'COLLATE utf8mb4_bin',
-        'message': 'Unsupported COLLATE. Replacing with utf8mb4_bin.'
+        'message': 'Unsupported COLLATE. Replacing with utf8mb4_bin. 3'
     },
     {
         'name': 'Unsupported COLLATE',
         'pattern': re.compile(r'COLLATE\s*=\s*(\w+)', re.IGNORECASE),
-        'action': 'replace',
+        'action': 'force_replace_to_utf8mb4_bin',
         'replace': 'COLLATE = utf8mb4_bin',
-        'message': 'Unsupported COLLATE=. Replacing with utf8mb4_bin.'
+        'message': 'Unsupported COLLATE=. Replacing with utf8mb4_bin. 4'
     },
     {
         'name': 'Column-Level Privileges',
@@ -136,9 +136,6 @@ def check_compatibility(input_file, apply_fix=False):
     delimiter_block_lines = []
     block_start_line = 0
     
-    input_dir = os.path.dirname(input_file)
-    input_filename = os.path.basename(input_file)
-
     with open(input_file, 'r') as f:
         lines = f.readlines()
     
@@ -218,6 +215,7 @@ def check_compatibility(input_file, apply_fix=False):
                     if charset not in SUPPORTED_CHARSETS:
                         line_modified = rule['pattern'].sub(rule['replace'], line_modified)
                         line_warnings.append(rule['message'])
+                        
 
                 # collate
                 if rule['name'] in ( 'Unsupported COLLATE' ) :
@@ -266,11 +264,9 @@ def check_compatibility(input_file, apply_fix=False):
     
     # output to file when apply_fix
     if apply_fix:
-        output_filename = 'tidb_compatible_' + input_filename
-        output_file = os.path.join(input_dir, output_filename) if input_dir else output_filename
-        with open(output_file, 'w') as f:
+        with open(input_file, 'w') as f:
             f.writelines(output_lines)
-        print(f"\nModified schema file generated: {output_file}")
+        print(f"\nSchema file has been modified in place: {input_file}")
         print("Note: Some incompatible features have been removed or modified. "
               "Review the output file and test thoroughly before using in TiDB.")
 
@@ -284,7 +280,7 @@ def main():
     )
     parser.add_argument('input_file', help='Input MySQL schema SQL file')
     parser.add_argument('--apply', action='store_true', 
-                        help='Generate modified schema file with fixes applied')
+                        help='modify input file in place, removing incompatible features')
     
     args = parser.parse_args()
     
