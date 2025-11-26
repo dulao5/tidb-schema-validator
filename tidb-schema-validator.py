@@ -1,8 +1,8 @@
+import argparse
+import glob
 import os
 import re
 import sys
-import argparse
-import glob
 
 # support charsets
 SUPPORTED_CHARSETS = {'utf8mb4', 'latin1', 'ascii', 'binary', 'gbk'}
@@ -126,6 +126,13 @@ DETECTION_RULES = [
         'pattern': re.compile(r'\s(TINYINT|SMALLINT|MEDIUMINT|INT).*\bAUTO_INCREMENT[^=]', re.IGNORECASE),
         'action': 'warn',
         'message': 'Note: The data type of this auto_increment field is not BIGINT, which poses a risk of overflow.'
+    },
+    {
+        'name': 'Row Format',
+        'pattern': re.compile(r'\bROW_FORMAT\s*=\s*\w+', re.IGNORECASE),
+        'action': 'replace',
+        'replace': '',
+        'message': 'TiDB does not support ROW_FORMAT. This option will be ignored.'
     }
 ]
 

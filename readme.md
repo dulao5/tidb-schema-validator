@@ -52,6 +52,7 @@ Examples:
 | Auto-increment Behavior Notice     | `CREATE TABLE t (id INT PRIMARY KEY AUTO_INCREMENT);`                  | warning                  |
 | Auto-increment BigintType          | `id int(10) NOT NULL AUTO_INCREMENT`                                   | warning                  |
 | Table without PRIMARY or UNIQUE KEY| `CREATE TABLE t (val INT );`                                           | warning                  |
+| ROW_FORMAT                        | `CREATE TABLE t (val INT ) ROW_FORMAT=COMPRESSED;`                     | remove 'ROW_FORMAT=COMPRESSED'      |
 
 
 ## Sample
